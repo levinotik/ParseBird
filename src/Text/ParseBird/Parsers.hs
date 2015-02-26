@@ -12,16 +12,16 @@ import Control.Monad.Identity (Identity)
 parse rule text = Parsec.parse rule "(source)" text
 
 hashtag :: Parsec.Parsec String () String
-hashtag = (do
+hashtag = Parsec.try ( do
+      Parsec.char '#'
+      letter <- Parsec.letter
+      rest <- (Parsec.manyTill Parsec.alphaNum (Parsec.try ((Parsec.space >> return []) <|> (Parsec.eof >> return []))))
+      return (letter:rest)) <|> Parsec.try (do
       Parsec.char '#'
       digits <- Parsec.many Parsec.digit
       letters <- Parsec.many1 Parsec.letter
       rest <- Parsec.many Parsec.alphaNum <|> (Parsec.try ((Parsec.space >> return []) <|> (Parsec.eof >> return [])))
-      return (digits ++ letters ++ rest)) <|> do
-      Parsec.char '#'
-      letter <- Parsec.letter
-      rest <- (Parsec.manyTill Parsec.alphaNum (Parsec.try ((Parsec.space >> return []) <|> (Parsec.eof >> return []))))
-      return (letter:rest)
+      return (digits ++ letters ++ rest))
 
 mentionedScreenname = do
   Parsec.char '@'
