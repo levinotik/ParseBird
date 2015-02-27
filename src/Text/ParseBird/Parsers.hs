@@ -11,7 +11,7 @@ import Control.Monad
 
 import Control.Monad.Identity (Identity)
 
-parse rule text = Parsec.parse rule "(source)" text
+parse rule = Parsec.parse rule "(source)"
 
 -- | Parse hashtags
 --
@@ -43,18 +43,16 @@ parse rule text = Parsec.parse rule "(source)" text
 hashtag :: Parsec.Parsec String () String
 hashtag  = do
       Parsec.char '#'
-      h <- Parsec.many1 Parsec.alphaNum >>= (\x -> (Parsec.notFollowedBy (Parsec.char '#')) >>= \y -> return x)
-      unless (any isLetter h) $
-        Parsec.parserZero
+      h <- Parsec.many1 Parsec.alphaNum >>= (\x -> Parsec.notFollowedBy (Parsec.char '#') >>= \y -> return x)
+      unless (any isLetter h) Parsec.parserZero
       return h
 
 mentionedScreenname = do
   Parsec.char '@'
-  name <- Parsec.manyTill (Parsec.alphaNum <|> (Parsec.char '_')) spaceOrEnd
-  return name
+  Parsec.manyTill (Parsec.alphaNum <|> Parsec.char '_') spaceOrEnd
 
 spaceOrEnd :: Parsec.Parsec String () ()
-spaceOrEnd = Parsec.try ((Parsec.space >> return ()) <|> Parsec.eof)
+spaceOrEnd = Parsec.try (void Parsec.space <|> Parsec.eof)
 
 totalResults :: Either Parsec.ParseError [a] -> Int
 totalResults = either (const 0) length
