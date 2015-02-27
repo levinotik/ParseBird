@@ -17,25 +17,20 @@ parse rule text = Parsec.parse rule "(source)" text
 --
 -- Examples:
 --
--- >>> parse hashtag "#1"
--- Left "(source)" (line 1, column 3):
--- unexpected end of input
--- expecting letter or digit
+-- >>> either (const False) (const True) $ parse hashtag "#1"
+-- False
 --
--- >>> parse hashtag "#1#"
--- Left "(source)" (line 1, column 3):
--- unexpected "#"
--- expecting letter or digit
+-- >>> either (const False) (const True) $ parse hashtag "#1#"
+-- False
 --
--- >>> parse hashtag "#"
--- Left "(source)" (line 1, column 2):
--- unexpected end of input
--- expecting letter or digit
+-- >>> either (const False) (const True) $ parse hashtag "#a#b"
+-- False
 --
--- >>> parse hashtag "a"
--- Left "(source)" (line 1, column 1):
--- unexpected "a"
--- expecting "#"
+-- >>> either (const False) (const True) $ parse hashtag "#"
+-- False
+--
+-- >>> either (const False) (const True) $ parse hashtag "a"
+-- False
 --
 -- >>> parse hashtag "#a@"
 -- Right "a"
@@ -48,8 +43,8 @@ parse rule text = Parsec.parse rule "(source)" text
 hashtag :: Parsec.Parsec String () String
 hashtag  = do
       Parsec.char '#'
-      h <- Parsec.many1 Parsec.alphaNum
-      unless (any isLetter h || any (== '#') h) $
+      h <- Parsec.many1 Parsec.alphaNum >>= (\x -> (Parsec.notFollowedBy (Parsec.char '#')) >>= \y -> return x)
+      unless (any isLetter h) $
         Parsec.parserZero
       return h
 
