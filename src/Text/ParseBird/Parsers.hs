@@ -17,7 +17,7 @@ hashtag :: Parsec.Parsec String () String
 hashtag  = do
       Parsec.char '#'
       h <- Parsec.many1 Parsec.alphaNum
-      unless (any isLetter h) $
+      unless (any isLetter h || any (== '#') h) $
         Parsec.parserZero
       return h
 
