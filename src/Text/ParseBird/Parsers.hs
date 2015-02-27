@@ -13,6 +13,38 @@ import Control.Monad.Identity (Identity)
 
 parse rule text = Parsec.parse rule "(source)" text
 
+-- | Parse hashtags
+--
+-- Examples:
+--
+-- >>> parse hashtag "#1"
+-- Left "(source)" (line 1, column 3):
+-- unexpected end of input
+-- expecting letter or digit
+--
+-- >>> parse hashtag "#1#"
+-- Left "(source)" (line 1, column 3):
+-- unexpected "#"
+-- expecting letter or digit
+--
+-- >>> parse hashtag "#"
+-- Left "(source)" (line 1, column 2):
+-- unexpected end of input
+-- expecting letter or digit
+--
+-- >>> parse hashtag "a"
+-- Left "(source)" (line 1, column 1):
+-- unexpected "a"
+-- expecting "#"
+--
+-- >>> parse hashtag "#a@"
+-- Right "a"
+--
+-- >>> parse hashtag "#a"
+-- Right "a"
+--
+-- parse hashtag "#1a"
+-- Right "#1a"
 hashtag :: Parsec.Parsec String () String
 hashtag  = do
       Parsec.char '#'
