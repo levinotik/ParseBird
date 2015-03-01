@@ -41,9 +41,9 @@ parse rule = Parsec.parse rule "(source)"
 -- parse hashtag "#1a"
 -- Right "#1a"
 hashtag :: Parsec.Parsec String () String
-hashtag  = do
+hashtag  =  do
       Parsec.char '#'
-      h <- Parsec.many1 Parsec.alphaNum >>= (\x -> Parsec.notFollowedBy (Parsec.char '#') >>= \y -> return x)
+      h <- Parsec.many1 Parsec.alphaNum >>= (\x -> Parsec.notFollowedBy (Parsec.char '#') >> return x)
       unless (any isLetter h) Parsec.parserZero
       return h
 
